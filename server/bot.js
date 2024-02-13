@@ -115,7 +115,7 @@ module.exports = (database) => {
                     "actionType": "kick",
                     "content": {
                         "user": argument[0],
-                        "reason": argument.slice(0).join(" ")
+                        "reason": argument.slice(1).join(" ")
                     }
                 })
 
@@ -131,7 +131,7 @@ module.exports = (database) => {
                     "actionType": "ban",
                     "content": {
                         "user": argument[0],
-                        "reason": argument.slice(0).join(" ")
+                        "reason": argument.slice(1).join(" ")
                     }
                 })
 
@@ -147,7 +147,7 @@ module.exports = (database) => {
                     "actionType": "unban",
                     "content": {
                         "user": argument[0],
-                        "reason": argument.slice(0).join(" ")
+                        "reason": argument.slice(1).join(" ")
                     }
                 })
 
