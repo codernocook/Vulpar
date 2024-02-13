@@ -62,14 +62,14 @@ npm start
 # Game Installation
 1. Download the file from **[here](https://raw.githubusercontent.com/codernocook/Vulpar/main/roblox/Vulpar%20build%201.0.0.rbxm)**: https://raw.githubusercontent.com/codernocook/Vulpar/main/roblox/Vulpar%20build%201.0.0.rbxm
 2. Drag and Drop the downloaded file into your Roblox game
-3. Drag it into "ServerScriptService".
+3. Drag it and drop into "ServerScriptService".
 
 ## Replace
-4. Replace the "README.apiURL.replace" with the website hosting URL from the Server Installation
-5. Replace the "README.accessToken.replace" with the `accessToken` in the server's .env file
+4. Replace the `README.apiURL.replace` with the URL of the website where the server is hosted.
+5. Replace the `README.accessToken.replace` with the accessToken found in the server's `.env` file.
 
 ## Important
-4. Allow HTTP by go to your Game Settings.
+4. Allow HTTP by going to your Game Settings.
 
 # Done
 - if you can't setup just open an issue i guess, brrr
