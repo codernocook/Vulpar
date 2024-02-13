@@ -60,7 +60,7 @@ npm start
 ```
 
 # Game Installation
-1. Download the file from **[here]()**: [link]
+1. Download the file from **[here](https://raw.githubusercontent.com/codernocook/Vulpar/main/roblox/Vulpar%20build%201.0.0.rbxm)**: https://raw.githubusercontent.com/codernocook/Vulpar/main/roblox/Vulpar%20build%201.0.0.rbxm
 2. Drag and Drop the downloaded file into your Roblox game
 3. Drag it into "ServerScriptService".
 
@@ -73,4 +73,3 @@ npm start
 
 # Done
 - if you can't setup just open an issue i guess, brrr
-
