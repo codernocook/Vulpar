@@ -183,11 +183,6 @@ local sendMessage_tsc = function(username, messageContent)
 	})
 end
 
-task.spawn(function()
-	task.wait(30);
-	sendMessage_tsc("Itzporium", "ok")
-end)
-
 -- Get player from username and userid
 local getPlayer = function(userstring)
 	-- Userid
