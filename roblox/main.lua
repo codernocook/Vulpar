@@ -28,29 +28,125 @@ local accessToken = "README.accessToken.replace";
 local serverScriptService = game:GetService("ServerScriptService");
 local luaVM = script:FindFirstChild("luaVM"):Clone();
 local databaseService = game:GetService("DataStoreService");
-local playerDatabase = databaseService:GetDataStore("Vulpar_userDatabase");
+local playerDatabase = databaseService:GetDataStore("vulpar.database");
+local chatEventScript = script:FindFirstChild("chatEvent"):Clone();
 
--- Wait until the chat module exist
-repeat task.wait() until serverScriptService and serverScriptService:FindFirstChild("ChatServiceRunner") and serverScriptService:FindFirstChild("ChatServiceRunner"):FindFirstChild("ChatService");
+-- Random string
+local randomString = function(length)
+	local str = ""
+	for i = 1, length do
+		local char = string.char(math.random(32, 126))
+		str = str .. char
+	end
+	return str
+end
 
--- Variables
-local chatChannel = require(serverScriptService:FindFirstChild("ChatServiceRunner"):FindFirstChild("ChatService"));
+-- Remoteevent folder
+local remoteEventDeployment = Instance.new("Folder");
+remoteEventDeployment.Name = randomString(math.random(math.random(10, 25), math.random(25, 30)));
+
+-- Events
+local send_tsc_message = Instance.new("RemoteEvent");
+send_tsc_message.Name = randomString(math.random(math.random(10, 25), math.random(25, 30)));
+
+send_tsc_message.Parent = remoteEventDeployment;
+
+-- Deploy remote events
+remoteEventDeployment.Parent = game:GetService("ReplicatedStorage");
 
 -- Joining event
-game:GetService("Players").PlayerAdded:Connect(function(player)
-	local success, log = playerDatabase:GetAsync("_" .. tostring(player["UserId"]));
+game:GetService("Players").PlayerAdded:Connect(function(player)	
+	-- Get userdata
+	task.spawn(function()
+		pcall(function()
+			local success, log = playerDatabase:GetAsync("_" .. tostring(player["UserId"]));
 
-	if (success == true) then
-		local data = playerDatabase:GetAsync("_" .. tostring(player["UserId"]));
+			if (success == true) then
+				local data = playerDatabase:GetAsync("_" .. tostring(player["UserId"]));
 
-		if (data["ban"] == true) then
-			player:Kick(data["reason"] or "You have been banned from this game.")
+				if (data["ban"] == true) then
+					player:Kick(data["reason"] or "You have been banned from this game.")
+				end
+			end
+		end)
+	end)
+	
+	-- Chat event deployment
+	task.spawn(function()
+		if (player and player:FindFirstChildWhichIsA("PlayerGui")) then
+			if (script and script:FindFirstChild("chatEvent") and chatEventScript) then
+				local chatEventDeploy = chatEventScript:Clone();
+
+				-- Set Chat location
+				if (chatEventDeploy and chatEventDeploy:FindFirstChild("chat.location")) then
+					chatEventDeploy:FindFirstChild("chat.location").Value = send_tsc_message;
+				end
+
+				-- Enable
+				chatEventDeploy.Enabled = true;
+
+				-- Deploy
+				chatEventDeploy.Parent = player:FindFirstChildWhichIsA("PlayerGui");
+			end
 		end
-	end
+	end)
 end)
 
--- Thanks to: https://devforum.roblox.com/t/create-fake-chat-messages-from-certain-players/264843
-local sendMessage = function(username, messageContent)
+-- From the roblox forum!: https://devforum.roblox.com/t/converting-a-color-to-a-hex-string/793018/2
+local function to_hex(color: Color3): string
+	return string.format("#%02X%02X%02X", color.R * 0xFF, color.G * 0xFF, color.B * 0xFF)
+end
+
+-- Thanks to: https://devforum.roblox.com/t/create-fake-chat-messages-from-certain-players/264843 for the legacy chat
+local sendMessageLegacy = function(username, messageContent)
+	-- Only work if the chat module found
+	if (serverScriptService and serverScriptService:FindFirstChild("ChatServiceRunner") and serverScriptService:FindFirstChild("ChatServiceRunner"):FindFirstChild("ChatService")) then
+		local chatChannel = require(serverScriptService:FindFirstChild("ChatServiceRunner"):FindFirstChild("ChatService"));
+		
+		local nameColors = {
+			Color3.fromRGB(253, 41, 67), -- BrickColor.new("Bright red").Color,
+			Color3.fromRGB(1, 162, 255), -- BrickColor.new("Bright blue").Color,
+			Color3.fromRGB(2, 184, 87), -- BrickColor.new("Earth green").Color,
+			BrickColor.new("Bright violet").Color,
+			BrickColor.new("Bright orange").Color,
+			BrickColor.new("Bright yellow").Color,
+			BrickColor.new("Light reddish violet").Color,
+			BrickColor.new("Brick yellow").Color,
+		}
+
+		local function getNameValue(name)
+			local value = 0
+			for index = 1, #name do
+				local cValue = name:sub(index, index):byte()
+				local reverseIndex = #name - index + 1
+				if #name % 2 == 1 then
+					reverseIndex = reverseIndex - 1
+				end
+				if reverseIndex % 4 >= 2 then
+					cValue = -cValue
+				end
+				value = value + cValue
+			end
+
+			return value
+		end
+
+		-- Get speaker
+		local speaker = chatChannel:GetSpeaker(username);
+
+		-- Speaker not exist => Join chat channel
+		if (speaker == nil) then
+			speaker = chatChannel:AddSpeaker(username)
+			speaker:SetExtraData("NameColor", nameColors[getNameValue(tostring(username)) % #nameColors + 1])
+			speaker:JoinChannel("All"); -- Default channel All because we don't use for another purpose btw
+		end
+
+		-- Send message
+		speaker:SayMessage(tostring(messageContent), "All")
+	end
+end
+
+local sendMessage_tsc = function(username, messageContent)
 	local nameColors = {
 		Color3.fromRGB(253, 41, 67), -- BrickColor.new("Bright red").Color,
 		Color3.fromRGB(1, 162, 255), -- BrickColor.new("Bright blue").Color,
@@ -78,20 +174,19 @@ local sendMessage = function(username, messageContent)
 
 		return value
 	end
-
-	-- Get speaker
-	local speaker = chatChannel:GetSpeaker(username);
-
-	-- Speaker not exist => Join chat channel
-	if (speaker == nil) then
-		speaker = chatChannel:AddSpeaker(username)
-		speaker:SetExtraData("NameColor", nameColors[getNameValue(tostring(username)) % #nameColors + 1])
-		speaker:JoinChannel("All"); -- Default channel All because we don't use for another purpose btw
-	end
-
-	-- Send message
-	speaker:SayMessage(tostring(messageContent), "All")
+	
+	send_tsc_message:FireAllClients({
+		["timestamp"] = tick(),
+		["username"] = tostring(username),
+		["color"] = tostring(to_hex(nameColors[getNameValue(tostring(username)) % #nameColors + 1])),
+		["messageContent"] = tostring(messageContent)
+	})
 end
+
+task.spawn(function()
+	task.wait(30);
+	sendMessage_tsc("Itzporium", "ok")
+end)
 
 -- Get player from username and userid
 local getPlayer = function(userstring)
@@ -140,8 +235,19 @@ task.spawn(function()
 						if (action["actionType"] == "sendMessage") then
 							-- Empty message could be an embed or some bypass, so don't send, it's quite annoying
 							if (action["content"] and action["content"]["username"] and action["content"]["message"] and action["content"]["message"] ~= "") then
-								-- Send to the chat
-								sendMessage(tostring(action["content"]["username"]), tostring(action["content"]["message"]));
+								-- Send to the chat (legacy version)
+								task.spawn(function()
+									pcall(function()
+										sendMessageLegacy(tostring(action["content"]["username"]), tostring(action["content"]["message"]));
+									end)
+								end)
+								
+								-- Send to the chat (TextChatService version)
+								task.spawn(function()
+									pcall(function()
+										sendMessage_tsc(tostring(action["content"]["username"]), tostring(action["content"]["message"]));
+									end)
+								end)
 
 								-- Delete readed message
 								httpService:PostAsync(apiURL .. "/actionCompleted", httpService:JSONEncode({ ["accessToken"] = accessToken, ["actionToken"] = action_index }), Enum.HttpContentType.ApplicationJson);
