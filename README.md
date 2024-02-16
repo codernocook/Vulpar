@@ -14,7 +14,7 @@ A discord bot that replace in-game admin command.
 
 ## Server installation
 Download the code from this repo, clicking on the "Code" button and press **Download Zip**\
-Or you can download from here: https://github.com/codernocook/Vulpar/archive/refs/heads/main.zip\
+Or you can download from here: https://github.com/codernocook/Vulpar/archive/refs/heads/main.zip
 
 If you use **Terminal** with git installed:
 ```bash
@@ -60,7 +60,7 @@ npm start
 ```
 
 # Game Installation
-1. Download the file from **[here](https://raw.githubusercontent.com/codernocook/Vulpar/main/roblox/Vulpar%20build%201.0.0.rbxm)**: https://raw.githubusercontent.com/codernocook/Vulpar/main/roblox/Vulpar%20build%201.0.0.rbxm
+1. Download the file from **[here](https://github.com/codernocook/Vulpar/raw/main/roblox/Vulpar%20v1.3.18.rbxm)**: https://github.com/codernocook/Vulpar/raw/main/roblox/Vulpar%20v1.3.18.rbxm
 2. Drag and Drop the downloaded file into your Roblox game
 3. Drag it and drop into "ServerScriptService".
 
